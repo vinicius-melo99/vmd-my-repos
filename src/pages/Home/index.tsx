@@ -7,28 +7,43 @@ import {
   useState,
 } from 'react';
 import { Container, Form, SubmitButton } from './styles';
-import { FaGithub, FaPlus } from 'react-icons/fa';
+import { FaGithub, FaPlus, FaSpinner } from 'react-icons/fa';
 import githubApiRequest from '../../api/githubApiRequest';
-import { AxiosResponse } from 'axios';
+import { AxiosError, AxiosResponse } from 'axios';
 import { RepoType } from '../../types';
+import { sweetError } from '../../aux/sweetAlert';
 
 const Home = () => {
   const [repoSearch, setRepoSearch] = useState<string>('');
   const [repositories, setRepositories] = useState<RepoType[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
   const inputRepo = useRef<HTMLInputElement>(null);
 
   const searchRepo = useCallback(() => {
     (async () => {
-      const { data }: AxiosResponse<RepoType> =
-        await githubApiRequest(repoSearch);
+      try {
+        setLoading(true);
+        const { data }: AxiosResponse<RepoType> =
+          await githubApiRequest(repoSearch);
 
-      const newRepo: RepoType = {
-        full_name: data.full_name,
-      };
+        const newRepo: RepoType = {
+          full_name: data.full_name,
+        };
 
-      setRepositories([...repositories, newRepo]);
-      setRepoSearch('');
-      inputRepo.current?.focus();
+        setRepositories([...repositories, newRepo]);
+      } catch (e) {
+        const { status, message } = e as AxiosError;
+
+        if (status === 404) {
+          return sweetError(`${status}: Repositório não encontrado`);
+        }
+
+        sweetError(`${status}: ${message}`);
+      } finally {
+        setRepoSearch('');
+        inputRepo.current?.focus();
+        setLoading(false);
+      }
     })();
   }, [repoSearch, repositories]);
 
@@ -47,7 +62,7 @@ const Home = () => {
     const key = e.key;
     const enter = 'Enter';
 
-    if (key === enter) searchRepo();
+    if (repoSearch && key === enter && !loading) searchRepo();
   };
 
   return (
@@ -67,8 +82,12 @@ const Home = () => {
           ref={inputRepo}
         />
 
-        <SubmitButton>
-          <FaPlus color="#fff" size={15} />
+        <SubmitButton disabled={!repoSearch || loading}>
+          {!loading ? (
+            <FaPlus color="#fff" size={15} />
+          ) : (
+            <FaSpinner className="loading" color="#fff" size={15} />
+          )}
         </SubmitButton>
       </Form>
     </Container>
