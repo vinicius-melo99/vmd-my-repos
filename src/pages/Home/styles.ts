@@ -44,7 +44,26 @@ export const SubmitButton = styled.button`
   align-items: center;
   transition: 300ms;
 
-  &:hover {
+  &:hover:not(:disabled) {
     background-color: rgb(7, 20, 29);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  svg.loading {
+    animation: rotate-spinner 1s linear infinite;
+  }
+
+  @keyframes rotate-spinner {
+    from {
+      transform: rotate(0deg);
+    }
+
+    to {
+      transform: rotate(360deg);
+    }
   }
 `;
