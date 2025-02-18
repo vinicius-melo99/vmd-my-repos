@@ -1,4 +1,11 @@
-import { ChangeEvent, FormEvent, KeyboardEvent, useRef, useState } from 'react';
+import {
+  ChangeEvent,
+  FormEvent,
+  KeyboardEvent,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import { Container, Form, SubmitButton } from './styles';
 import { FaGithub, FaPlus, FaSpinner } from 'react-icons/fa';
 import githubApiRequest from '../../api/githubApiRequest';
@@ -12,6 +19,21 @@ const Home = () => {
   const [repositories, setRepositories] = useState<RepoType[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const inputRepo = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (!localStorage.getItem('repositories')) {
+      return localStorage.setItem('repositories', JSON.stringify([]));
+    }
+
+    const reposJSON = localStorage.getItem('repositories');
+    const repos = JSON.parse(reposJSON as string);
+
+    setRepositories(repos);
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem('repositories', JSON.stringify(repositories));
+  }, [repositories]);
 
   const searchRepo = async () => {
     const repoExists = checkIfRepoExists();
@@ -95,6 +117,7 @@ const Home = () => {
       </h1>
       <Form onSubmit={handleSubmit}>
         <input
+          id="search-repo"
           type="text"
           placeholder="adicionar repositórios"
           autoFocus
