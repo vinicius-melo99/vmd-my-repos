@@ -7,5 +7,6 @@ export const sweetError = (text: string) => {
     text: text,
     timer: 2500,
     timerProgressBar: true,
+    showConfirmButton: false,
   });
 };

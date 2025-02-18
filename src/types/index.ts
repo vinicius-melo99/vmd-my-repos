@@ -5,3 +5,8 @@ export type RepoType = {
 export type SubmitButtonProps = {
   loading: number;
 };
+
+export type RepoListType = {
+  repositories: RepoType[];
+  deleteRepo: (name: string) => void;
+};
